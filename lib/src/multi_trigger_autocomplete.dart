@@ -226,7 +226,7 @@ class MultiTriggerAutocompleteState extends State<MultiTriggerAutocomplete> {
     final text = _textEditingController.text;
 
     var start = querySelection.baseOffset;
-    if (!keepTrigger) start -= 1;
+    if (!keepTrigger) start -= _currentTrigger.trigger.length;
 
     final end = querySelection.extentOffset;
 
