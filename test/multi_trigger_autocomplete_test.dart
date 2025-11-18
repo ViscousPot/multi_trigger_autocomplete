@@ -323,21 +323,37 @@ void main() {
       expect(field.controller!.text, isNot(contains('##')));
     });
 
-    testWidgets('cursor position correct after autocomplete with multi-character trigger', (tester) async {
+     testWidgets('cursor position correct after autocomplete with multi-character trigger', (tester) async {
       final multiCharTrigger = AutocompleteTrigger(
         trigger: '@@',
-        optionsViewBuilder: (context, query, controller) { },
+        optionsViewBuilder: (context, query, controller) {
+          return ListView.builder(
+            itemCount: 1,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: const Text('Option'),
+                onTap: () {
+                  final autocomplete = MultiTriggerAutocomplete.of(context);
+                  return autocomplete.acceptAutocompleteOption('Option');
+                },
+              );
+            },
+          );
+        },
       );
     
       await tester.pumpWidget(
         Boilerplate(
           child: MultiTriggerAutocomplete(
+            debounceDuration: kDebounceDuration,
             autocompleteTriggers: [multiCharTrigger],
           ),
         ),
       );
     
       await tester.enterText(find.byType(TextFormField), '@@sa');
+      await tester.pumpAndSettle(kDebounceDuration);
+      expect(find.byType(ListView), findsOneWidget);
       
       await tester.tap(find.byType(InkWell).first);
       await tester.pump();
