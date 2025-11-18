@@ -297,6 +297,57 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byType(TextFormField), findsNothing);
     });
+
+    testWidgets('handles multi-character triggers with keepTrigger=false', (tester) async {
+      final multiCharTrigger = AutocompleteTrigger(
+        trigger: '##'
+        optionsViewBuilder: (context, query, controller) { },
+      );
+    
+      await tester.pumpWidget(
+        Boilerplate(
+          child: MultiTriggerAutocomplete(
+            autocompleteTriggers: [multiCharTrigger],
+          ),
+        ),
+      );
+    
+      await tester.enterText(find.byType(TextFormField), '##');
+      
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pump();
+    
+      final TextFormField field = 
+        find.byType(TextFormField).evaluate().first.widget as TextFormField;
+      
+      expect(field.controller!.text, isNot(contains('##')));
+    });
+
+    testWidgets('cursor position correct after autocomplete with multi-character trigger', (tester) async {
+      final multiCharTrigger = AutocompleteTrigger(
+        trigger: '@@',
+        optionsViewBuilder: (context, query, controller) { },
+      );
+    
+      await tester.pumpWidget(
+        Boilerplate(
+          child: MultiTriggerAutocomplete(
+            autocompleteTriggers: [multiCharTrigger],
+          ),
+        ),
+      );
+    
+      await tester.enterText(find.byType(TextFormField), '@@sa');
+      
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pump();
+    
+      final TextFormField field = 
+        find.byType(TextFormField).evaluate().first.widget as TextFormField;
+      
+      expect(field.controller!.selection.baseOffset, 
+             equals(field.controller!.text.length));
+    });
   });
 }
 
